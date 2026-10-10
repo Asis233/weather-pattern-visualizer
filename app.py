@@ -2,7 +2,7 @@
 Weather Pattern Visualizer - Main Streamlit Application
 A modern, pastel-themed web dashboard for analyzing historical climate data,
 visualizing trends, comparing city weather patterns, predicting temperature trends,
-and fetching real-time weather observations.
+and auto-detecting real-time live weather observations.
 
 Author: Academic Project Presentation (BTech CSE)
 Tech Stack: Python, Streamlit, Pandas, NumPy, Seaborn, Matplotlib, Plotly, Scikit-learn, Requests
@@ -37,7 +37,7 @@ from utils.visualizations import (
     plot_seaborn_monthly_boxplot,
     plot_seaborn_correlation_heatmap
 )
-from utils.weather_api import fetch_current_weather
+from utils.weather_api import fetch_current_weather, detect_user_location
 from utils.ml_prediction import train_temperature_trend_model, plot_temperature_prediction
 
 # ---------------------------------------------------------
@@ -202,7 +202,7 @@ def inject_pastel_css():
 inject_pastel_css()
 
 # ---------------------------------------------------------
-# Helper Functions for Data Loading
+# Helper Functions for Data Loading & Live Weather Session
 # ---------------------------------------------------------
 @st.cache_data(show_spinner=False)
 def load_sample_dataset(file_path: str) -> pd.DataFrame:
@@ -212,6 +212,11 @@ def load_sample_dataset(file_path: str) -> pd.DataFrame:
     else:
         st.error(f"Sample dataset file missing at `{file_path}`.")
         return pd.DataFrame()
+
+# Auto Detect Live Weather for Header Badge (cached for 10 minutes)
+@st.cache_data(ttl=600, show_spinner=False)
+def get_header_live_weather():
+    return fetch_current_weather(use_auto_location=True)
 
 # ---------------------------------------------------------
 # Sidebar Setup & Navigation
@@ -233,13 +238,13 @@ with st.sidebar:
         label="Select Section",
         options=[
             "Overview",
+            "Live Current Weather (API)",
             "Historical Analysis",
             "Temperature Trends",
             "Rainfall Analysis",
             "Humidity & Wind Analysis",
             "Weather Comparison",
             "Data Explorer",
-            "Live Current Weather (API)",
             "Temperature Prediction (AI)",
             "About Project"
         ],
@@ -334,25 +339,31 @@ if not df.empty:
             df = df[(df["date"].dt.date >= start_date) & (df["date"].dt.date <= end_date)].copy()
 
 # OpenWeatherMap API Key in Sidebar
-with st.sidebar.expander("🔑 OpenWeatherMap API Key", expanded=False):
-    st.caption("Optional for live weather observations.")
-    user_api_key = st.text_input("Enter API Key", type="password", help="Free API key from openweathermap.org")
+with st.sidebar.expander("🔑 OpenWeatherMap API Key (Optional)", expanded=False):
+    st.caption("Optional. Open-Meteo zero-key live detection is enabled by default!")
+    user_api_key = st.text_input("Enter Key", type="password", help="Free key from openweathermap.org")
 
 # ---------------------------------------------------------
-# App Header Render
+# App Header Render with Live Weather Auto-Badge
 # ---------------------------------------------------------
 current_date_str = datetime.date.today().strftime("%B %d, %Y")
 source_badge = "Sample Dataset (Seattle)" if dataset_choice == "Sample Dataset (Single City)" else ("Sample Dataset (Multi-City)" if dataset_choice == "Sample Dataset (Multi-City)" else "Custom Uploaded Dataset")
+
+# Background Live Detection for Header
+live_header = get_header_live_weather()
+live_header_badge = ""
+if live_header["success"]:
+    live_header_badge = f"""<span class="badge-pill" style="background-color: {PASTEL_COLORS['mint_light']};">📍 Live Location: <b>{live_header['city']}</b> ({live_header['temp']}{live_header['units']} {live_header['icon_emoji']} {live_header['description']})</span>"""
 
 st.markdown(
     f"""
     <div class="main-header">
         <h1>🌤️ Weather Pattern Visualizer</h1>
-        <p>Explore historical weather data, discover patterns, and understand climate trends.</p>
+        <p>Explore historical weather data, discover patterns, and auto-detect real-time live climate observations.</p>
         <div style="margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <span class="badge-pill">📅 Today: {current_date_str}</span>
-            <span class="badge-pill" style="background-color: {PASTEL_COLORS['lavender_light']};">📂 Active Source: {source_badge}</span>
-            <span class="badge-pill" style="background-color: {PASTEL_COLORS['mint_light']};">🌡️ Unit: {temp_unit_code}</span>
+            {live_header_badge}
+            <span class="badge-pill" style="background-color: {PASTEL_COLORS['lavender_light']};">📂 Dataset: {source_badge}</span>
         </div>
     </div>
     """,
@@ -472,7 +483,94 @@ if nav_option == "Overview":
         st.markdown(f'<div class="narrative-box blue"><b>💡 Executive Insights:</b><br>{narratives["temp_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 2: Historical Analysis
+# Section 2: Live Current Weather (API Auto-Detection)
+# ---------------------------------------------------------
+elif nav_option == "Live Current Weather (API)":
+    st.markdown('<div class="section-heading">🌤️ Real-Time Live Weather Detection & Observation</div>', unsafe_allow_html=True)
+    
+    st.markdown(
+        """
+        <div class="narrative-box mint">
+            <b>📍 Live Location Auto-Detection Active:</b><br>
+            Automatically detects your current city and geographic coordinates using IP location APIs. 
+            <i>Works zero-configuration out-of-the-box via Open-Meteo Live API, or connects to your custom OpenWeatherMap API key!</i>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Session State for Live Weather Search
+    if "live_weather_city" not in st.session_state:
+        st.session_state["live_weather_city"] = ""
+    if "use_auto" not in st.session_state:
+        st.session_state["use_auto"] = True
+
+    c_search, c_auto_btn, c_unit = st.columns([3, 2, 1])
+    
+    with c_search:
+        search_city = st.text_input(
+            "Search Any City Worldwide", 
+            value=st.session_state["live_weather_city"], 
+            placeholder="e.g. Guwahati, London, New York, Tokyo, New Delhi"
+        )
+        
+    with c_auto_btn:
+        st.write("&nbsp;")
+        if st.button("🎯 Auto-Detect My Location"):
+            st.session_state["use_auto"] = True
+            st.session_state["live_weather_city"] = ""
+            st.rerun()
+
+    with c_unit:
+        unit_choice = st.selectbox("API Units", options=["Metric (°C, m/s)", "Imperial (°F, mph)"])
+        api_units = "imperial" if "Imperial" in unit_choice else "metric"
+
+    # Determine query mode
+    api_key_to_use = user_api_key if user_api_key else None
+    
+    if search_city.strip():
+        query_city = search_city.strip()
+        is_auto_mode = False
+    else:
+        query_city = None
+        is_auto_mode = True
+
+    with st.spinner("Fetching live real-time weather observations..."):
+        result = fetch_current_weather(
+            city_name=query_city, 
+            api_key=api_key_to_use, 
+            units=api_units, 
+            use_auto_location=is_auto_mode
+        )
+
+    if result["success"]:
+        st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
+        
+        c_header, c_icon = st.columns([4, 1])
+        with c_header:
+            loc_label = "🎯 Auto-Detected Current Location" if result.get("is_detected") else "🔍 Searched Location"
+            st.caption(f"{loc_label} • Powered by {result.get('provider')}")
+            st.markdown(f"### {result['city']}{', ' + result['country'] if result['country'] else ''}")
+            st.markdown(f"#### **{result['icon_emoji']} {result['description']}**")
+        with c_icon:
+            st.image(result["icon_url"], width=90)
+            
+        w1, w2, w3, w4 = st.columns(4)
+        with w1:
+            st.markdown(f'<div class="metric-card"><div class="metric-title">Temperature</div><div class="metric-value">{result["temp"]}{result["units"]}</div><div class="metric-sub">Feels like {result["feels_like"]}{result["units"]}</div></div>', unsafe_allow_html=True)
+        with w2:
+            st.markdown(f'<div class="metric-card peach"><div class="metric-title">Estimated Range</div><div class="metric-value">{result["temp_min"]} / {result["temp_max"]}</div><div class="metric-sub">Min / Max {result["units"]}</div></div>', unsafe_allow_html=True)
+        with w3:
+            st.markdown(f'<div class="metric-card mint"><div class="metric-title">Humidity</div><div class="metric-value">{result["humidity"]}%</div><div class="metric-sub">Pressure {result["pressure"]} hPa</div></div>', unsafe_allow_html=True)
+        with w4:
+            st.markdown(f'<div class="metric-card lavender"><div class="metric-title">Wind Speed</div><div class="metric-value">{result["wind_speed"]} {result["speed_units"]}</div><div class="metric-sub">Lat: {result["lat"]}, Lon: {result["lon"]}</div></div>', unsafe_allow_html=True)
+            
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.error(f"❌ Weather Error: {result['message']}")
+
+# ---------------------------------------------------------
+# Section 3: Historical Analysis
 # ---------------------------------------------------------
 elif nav_option == "Historical Analysis":
     st.markdown('<div class="section-heading">📂 Historical Dataset Analysis & Quality Check</div>', unsafe_allow_html=True)
@@ -513,7 +611,7 @@ elif nav_option == "Historical Analysis":
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 3: Temperature Trends
+# Section 4: Temperature Trends
 # ---------------------------------------------------------
 elif nav_option == "Temperature Trends":
     st.markdown('<div class="section-heading">🌡️ Temperature Variation & Seasonal Trends</div>', unsafe_allow_html=True)
@@ -563,7 +661,7 @@ elif nav_option == "Temperature Trends":
         st.markdown(f'<div class="narrative-box peach"><b>📊 Temperature Trend Explanation:</b><br>{narratives["temp_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 4: Rainfall Analysis
+# Section 5: Rainfall Analysis
 # ---------------------------------------------------------
 elif nav_option == "Rainfall Analysis":
     st.markdown('<div class="section-heading">🌧️ Precipitation & Rainfall Analysis</div>', unsafe_allow_html=True)
@@ -607,7 +705,7 @@ elif nav_option == "Rainfall Analysis":
         st.markdown(f'<div class="narrative-box mint"><b>🌧️ Precipitation Pattern Summary:</b><br>{narratives["rain_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 5: Humidity & Wind Analysis
+# Section 6: Humidity & Wind Analysis
 # ---------------------------------------------------------
 elif nav_option == "Humidity & Wind Analysis":
     st.markdown('<div class="section-heading">💨 Humidity & Wind Speed Dynamics</div>', unsafe_allow_html=True)
@@ -653,7 +751,7 @@ elif nav_option == "Humidity & Wind Analysis":
         st.markdown(f'<div class="narrative-box blue"><b>💡 Humidity & Wind Insights:</b><br>{narratives["humidity_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 6: Weather Comparison
+# Section 7: Weather Comparison
 # ---------------------------------------------------------
 elif nav_option == "Weather Comparison":
     st.markdown('<div class="section-heading">🏙️ Multi-City Weather Comparison</div>', unsafe_allow_html=True)
@@ -720,7 +818,7 @@ elif nav_option == "Weather Comparison":
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 7: Data Explorer
+# Section 8: Data Explorer
 # ---------------------------------------------------------
 elif nav_option == "Data Explorer":
     st.markdown('<div class="section-heading">🔍 Data Explorer & Export</div>', unsafe_allow_html=True)
@@ -767,77 +865,6 @@ elif nav_option == "Data Explorer":
         st.subheader("Descriptive Statistics Summary (`df.describe()`)")
         st.dataframe(df.describe().round(2), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# Section 8: Live Current Weather (OpenWeatherMap API)
-# ---------------------------------------------------------
-elif nav_option == "Live Current Weather (API)":
-    st.markdown('<div class="section-heading">🌤️ Live Current Weather API Integration</div>', unsafe_allow_html=True)
-    
-    st.markdown(
-        """
-        <div class="narrative-box blue">
-            <b>ℹ️ Real-Time Weather Observation Module:</b><br>
-            Connects to the OpenWeatherMap REST API to retrieve current weather conditions. 
-            <i>Note: Live weather observations are retrieved directly from satellite/station APIs and are distinct from historical datasets.</i>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    col_input, col_unit = st.columns([3, 1])
-    with col_input:
-        city_input = st.text_input("Enter City Name", value="London", placeholder="e.g. New York, Tokyo, New Delhi")
-    with col_unit:
-        unit_choice = st.selectbox("API Units", options=["Metric (°C, m/s)", "Imperial (°F, mph)"])
-        api_units = "imperial" if "Imperial" in unit_choice else "metric"
-
-    if st.button("🔍 Fetch Live Weather"):
-        api_key_to_use = user_api_key if user_api_key else None
-        
-        with st.spinner(f"Fetching real-time weather observations for {city_input}..."):
-            result = fetch_current_weather(city_input, api_key=api_key_to_use, units=api_units)
-            
-        if result["success"]:
-            st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
-            
-            c_header, c_icon = st.columns([4, 1])
-            with c_header:
-                st.markdown(f"### {result['city']}, {result['country']}")
-                st.caption(f"Observed at {result['dt_timestamp']}")
-                st.markdown(f"#### **{result['description']}**")
-            with c_icon:
-                st.image(result["icon_url"], width=90)
-                
-            w1, w2, w3, w4 = st.columns(4)
-            with w1:
-                st.markdown(f'<div class="metric-card"><div class="metric-title">Temperature</div><div class="metric-value">{result["temp"]}{result["units"]}</div><div class="metric-sub">Feels like {result["feels_like"]}{result["units"]}</div></div>', unsafe_allow_html=True)
-            with w2:
-                st.markdown(f'<div class="metric-card peach"><div class="metric-title">Temp Range</div><div class="metric-value">{result["temp_min"]} / {result["temp_max"]}</div><div class="metric-sub">Min / Max {result["units"]}</div></div>', unsafe_allow_html=True)
-            with w3:
-                st.markdown(f'<div class="metric-card mint"><div class="metric-title">Humidity</div><div class="metric-value">{result["humidity"]}%</div><div class="metric-sub">Pressure {result["pressure"]} hPa</div></div>', unsafe_allow_html=True)
-            with w4:
-                st.markdown(f'<div class="metric-card lavender"><div class="metric-title">Wind Speed</div><div class="metric-value">{result["wind_speed"]} {result["speed_units"]}</div></div>', unsafe_allow_html=True)
-                
-            st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            if result["error_type"] == "MISSING_KEY":
-                st.warning(f"⚠️ {result['message']}")
-                st.markdown(
-                    """
-                    <div class="pastel-card">
-                        <h4>🔑 How to configure your free OpenWeatherMap API Key:</h4>
-                        <ol>
-                            <li>Sign up for a free API key at <a href="https://openweathermap.org/api" target="_blank">openweathermap.org/api</a>.</li>
-                            <li>Enter the key in the sidebar expander <b>"🔑 OpenWeatherMap API Key"</b>.</li>
-                            <li>Or add <code>OPENWEATHER_API_KEY = "your_key"</code> to <code>.streamlit/secrets.toml</code> for local development / Render environment variables.</li>
-                        </ol>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-            else:
-                st.error(f"❌ API Error: {result['message']}")
 
 # ---------------------------------------------------------
 # Section 9: Temperature Trend Prediction (AI/ML)
@@ -908,7 +935,7 @@ elif nav_option == "About Project":
 
         ### 🧠 Problem Statement & Objectives
         - **Problem:** Raw meteorological datasets are often messy, high-dimensional, and difficult for non-experts to interpret without interactive visual tools.
-        - **Objective:** Build an intuitive, beginner-friendly visual dashboard with modern soft pastel UI aesthetics to auto-clean weather CSVs, compute statistical summaries, detect anomalies, compare multi-city microclimates, and integrate real-time REST API observations.
+        - **Objective:** Build an intuitive, beginner-friendly visual dashboard with modern soft pastel UI aesthetics to auto-clean weather CSVs, compute statistical summaries, detect anomalies, compare multi-city microclimates, auto-detect real-time live location weather, and integrate REST API observations.
 
         ---
 
@@ -919,28 +946,28 @@ elif nav_option == "About Project":
         - **Interactive Plotting:** Plotly (Plotly Express & Graph Objects)
         - **Statistical Graphics:** Seaborn, Matplotlib
         - **Machine Learning:** Scikit-Learn (Linear & Polynomial Regression)
-        - **API Client:** Requests (OpenWeatherMap REST API)
+        - **API & Geolocation:** Requests, IP Geolocation, Open-Meteo Live API, OpenWeatherMap REST API
         - **Deployment Target:** Render (Web Service Platform)
 
         ---
 
         ### ✨ Key Features Implemented
-        1. **Fuzzy Column Auto-Detection:** Automatically maps unknown CSV column headers to standardized meteorological variables.
-        2. **Dynamic Date & Location Filtering:** Interactively updates metrics and charts across user-selected date ranges and cities.
-        3. **Multi-City Weather Comparison:** Side-by-side statistical comparison across multiple geographical locations.
-        4. **Seaborn & Matplotlib Integration:** Statistical Kernel Density Estimations (KDE), Monthly Boxplots, and Correlation Heatmaps.
-        5. **Automated Data Insights:** Rule-based natural language narrative generation for executive summaries.
-        6. **Scikit-Learn Machine Learning:** Statistical trendline fitting and short-term temperature projection with evaluation metrics ($R^2$, MAE, RMSE).
-        7. **OpenWeatherMap API Integration:** Secure, real-time live weather lookup with error handling.
+        1. **Live Location Weather Auto-Detection:** IP-based location detection retrieving instant real-time weather observations.
+        2. **Fuzzy Column Auto-Detection:** Automatically maps unknown CSV column headers to standardized meteorological variables.
+        3. **Dynamic Date & Location Filtering:** Interactively updates metrics and charts across user-selected date ranges and cities.
+        4. **Multi-City Weather Comparison:** Side-by-side statistical comparison across multiple geographical locations.
+        5. **Seaborn & Matplotlib Integration:** Statistical Kernel Density Estimations (KDE), Monthly Boxplots, and Correlation Heatmaps.
+        6. **Automated Data Insights:** Rule-based natural language narrative generation for executive summaries.
+        7. **Scikit-Learn Machine Learning:** Statistical trendline fitting and short-term temperature projection with evaluation metrics ($R^2$, MAE, RMSE).
 
         ---
 
         ### 🎓 Academic Viva Questions & Answers
-        1. **Q: How does the application handle missing CSV columns or invalid dates?**  
-           *A: The system uses pandas coerce logic to convert dates safely, drops rows with invalid timestamps, fills missing derived fields where possible, and provides graceful empty-state warnings without crashing.*
+        1. **Q: How does real-time live location detection work?**  
+           *A: The app queries IP geolocation endpoints to resolve latitude, longitude, and city name, then queries the Open-Meteo or OpenWeatherMap API for live temperature, humidity, wind, and atmospheric conditions.*
            
-        2. **Q: Why use Plotly alongside Seaborn?**  
-           *A: Plotly provides client-side interactive zooming, panning, and tooltips for time-series exploration, whereas Seaborn generates static publication-quality statistical distributions (KDE, boxplots, heatmaps).*
+        2. **Q: How does the application handle missing CSV columns or invalid dates?**  
+           *A: The system uses pandas coerce logic to convert dates safely, drops rows with invalid timestamps, fills missing derived fields where possible, and provides graceful empty-state warnings without crashing.*
            
         3. **Q: How are API keys protected in production?**  
            *A: Keys are accessed via Streamlit Secrets (`st.secrets`) or environment variables, preventing hardcoded credentials from entering version control.*

@@ -1,6 +1,6 @@
 """
 End-to-End Test Suite for Weather Pattern Visualizer
-Verifies data processing, chart generation, metrics calculation, and ML trend prediction.
+Verifies data processing, chart generation, metrics calculation, ML trend prediction, and live weather.
 """
 
 import sys
@@ -18,7 +18,7 @@ from utils.visualizations import (
     plot_seaborn_temp_distribution, plot_seaborn_monthly_boxplot, plot_seaborn_correlation_heatmap
 )
 from utils.ml_prediction import train_temperature_trend_model, plot_temperature_prediction
-from utils.weather_api import fetch_current_weather
+from utils.weather_api import fetch_current_weather, detect_user_location
 
 def run_tests():
     print("--- 1. Testing Single City Sample Dataset ---")
@@ -68,10 +68,13 @@ def run_tests():
     fig_ml = plot_temperature_prediction(pred_df, temp_unit="C")
     print("[PASS] ML model training & trend prediction passed:", ml_metrics)
 
-    print("\n--- 4. Testing OpenWeatherMap API Wrapper (Missing Key Handled) ---")
+    print("\n--- 4. Testing Real-Time Live Weather & IP Location Auto-Detection ---")
+    loc_res = detect_user_location()
+    print("[PASS] IP GeoLocation Auto-Detection Result:", loc_res.get("city"), loc_res.get("country"))
+    
     api_res = fetch_current_weather("London")
-    assert api_res["success"] == False and api_res["error_type"] == "MISSING_KEY"
-    print("[PASS] API graceful missing key response verified:", api_res["message"])
+    assert api_res["success"] == True, f"Live weather request failed: {api_res}"
+    print(f"[PASS] Live weather fetch passed ({api_res['city']}, {api_res['temp']}{api_res['units']}, {api_res['description']}) via {api_res['provider']}")
 
     print("\n[SUCCESS] ALL E2E TESTS PASSED 100%!")
 
