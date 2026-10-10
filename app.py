@@ -361,20 +361,17 @@ live_header_badge = ""
 if live_header["success"]:
     live_header_badge = f"""<span class="badge-pill" style="background-color: {PASTEL_COLORS['mint_light']};">📍 Live Location: <b>{live_header['city']}</b> ({live_header['temp']}{live_header['units']} {live_header['icon_emoji']} {live_header['description']})</span>"""
 
-st.markdown(
-    f"""
-    <div class="main-header">
-        <h1>🌤️ Weather Pattern Visualizer</h1>
-        <p>Explore historical climate patterns, auto-detect real-time weather observations, and model temperature trends.</p>
-        <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <span class="badge-pill">📅 Today: {current_date_str}</span>
-            {live_header_badge}
-            <span class="badge-pill" style="background-color: {PASTEL_COLORS['lavender_light']};">📂 Dataset: {source_badge}</span>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+header_html = f"""<div class="main-header">
+<h1>🌤️ Weather Pattern Visualizer</h1>
+<p>Explore historical climate patterns, auto-detect real-time weather observations, and model temperature trends.</p>
+<div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+<span class="badge-pill">📅 Today: {current_date_str}</span>
+{live_header_badge}
+<span class="badge-pill" style="background-color: {PASTEL_COLORS['lavender_light']};">📂 Dataset: {source_badge}</span>
+</div>
+</div>"""
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # TOP TAB NAVIGATION LAYOUT
