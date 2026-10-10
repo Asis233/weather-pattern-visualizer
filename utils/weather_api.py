@@ -174,6 +174,7 @@ def fetch_open_meteo_weather(
 ) -> Dict[str, Any]:
     """
     Fetches real-time weather using Open-Meteo API (100% Free, no API Key needed).
+    Handles rate limiting gracefully.
     """
     try:
         # Geocode city if lat/lon not supplied
@@ -193,6 +194,12 @@ def fetch_open_meteo_weather(
                         "error_type": "CITY_NOT_FOUND",
                         "message": f"City '{city_name}' could not be located."
                     }
+            elif geo_res.status_code == 429:
+                return {
+                    "success": False,
+                    "error_type": "RATE_LIMIT",
+                    "message": "Open-Meteo Geocoding API rate limit reached. Please wait a moment."
+                }
             else:
                 return {
                     "success": False,
@@ -245,6 +252,12 @@ def fetch_open_meteo_weather(
                 "lat": lat,
                 "lon": lon,
                 "is_detected": is_detected
+            }
+        elif weather_res.status_code == 429:
+            return {
+                "success": False,
+                "error_type": "RATE_LIMIT",
+                "message": "Open-Meteo Live API rate limit reached. Please wait a few seconds before refreshing."
             }
         else:
             return {

@@ -435,17 +435,17 @@ with tab_overview:
         with col_left:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_trend = plot_daily_temperature_trend(df, temp_unit=temp_unit_code)
-            st.plotly_chart(fig_trend, use_container_width=True)
+            st.plotly_chart(fig_trend, use_container_width=True, key="overview_daily_trend_chart")
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_right:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             if "rainfall" in df.columns and df["rainfall"].notna().any():
                 fig_rain = plot_monthly_rainfall(df)
-                st.plotly_chart(fig_rain, use_container_width=True)
+                st.plotly_chart(fig_rain, use_container_width=True, key="overview_monthly_rain_chart")
             else:
                 fig_m_temp = plot_monthly_avg_temperature(df, temp_unit=temp_unit_code)
-                st.plotly_chart(fig_m_temp, use_container_width=True)
+                st.plotly_chart(fig_m_temp, use_container_width=True, key="overview_monthly_temp_chart")
             st.markdown('</div>', unsafe_allow_html=True)
 
         # Executive Summary Narrative Banner
@@ -542,7 +542,7 @@ with tab_temp:
         # Time-Series Daily Plot
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         fig1 = plot_daily_temperature_trend(df, temp_unit=temp_unit_code)
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, use_container_width=True, key="temp_daily_trend_chart")
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Monthly & Range Side-by-Side
@@ -550,13 +550,13 @@ with tab_temp:
         with c_left:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig2 = plot_monthly_avg_temperature(df, temp_unit=temp_unit_code)
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True, key="temp_monthly_avg_chart")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with c_right:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig3 = plot_min_max_temp_range(df, temp_unit=temp_unit_code)
-            st.plotly_chart(fig3, use_container_width=True)
+            st.plotly_chart(fig3, use_container_width=True, key="temp_min_max_range_chart")
             st.markdown('</div>', unsafe_allow_html=True)
 
         # Seaborn Statistical Plots
@@ -607,14 +607,14 @@ with tab_rain:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_daily_r = plot_daily_rainfall(df)
             if fig_daily_r:
-                st.plotly_chart(fig_daily_r, use_container_width=True)
+                st.plotly_chart(fig_daily_r, use_container_width=True, key="rain_daily_bar_chart")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col2:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_monthly_r = plot_monthly_rainfall(df)
             if fig_monthly_r:
-                st.plotly_chart(fig_monthly_r, use_container_width=True)
+                st.plotly_chart(fig_monthly_r, use_container_width=True, key="rain_monthly_bar_chart")
             st.markdown('</div>', unsafe_allow_html=True)
 
         narratives = generate_automated_narrative(df, temp_unit=temp_unit_code)
@@ -631,7 +631,7 @@ with tab_wind:
     else:
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         fig_hw = plot_humidity_wind_trends(df)
-        st.plotly_chart(fig_hw, use_container_width=True)
+        st.plotly_chart(fig_hw, use_container_width=True, key="wind_humidity_line_chart")
         st.markdown('</div>', unsafe_allow_html=True)
 
         c1, c2 = st.columns(2)
@@ -639,7 +639,7 @@ with tab_wind:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_scat1 = plot_temp_vs_humidity_scatter(df, temp_unit=temp_unit_code)
             if fig_scat1:
-                st.plotly_chart(fig_scat1, use_container_width=True)
+                st.plotly_chart(fig_scat1, use_container_width=True, key="scatter_temp_hum_chart")
             else:
                 st.info("Temperature or Humidity column missing for correlation plot.")
             st.markdown('</div>', unsafe_allow_html=True)
@@ -648,7 +648,7 @@ with tab_wind:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_scat2 = plot_rainfall_vs_humidity_scatter(df)
             if fig_scat2:
-                st.plotly_chart(fig_scat2, use_container_width=True)
+                st.plotly_chart(fig_scat2, use_container_width=True, key="scatter_rain_hum_chart")
             else:
                 st.info("Rainfall data missing for rainfall-humidity correlation plot.")
             st.markdown('</div>', unsafe_allow_html=True)
@@ -695,18 +695,18 @@ with tab_comp:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_c_temp = plot_city_comparison_bar(df, "temperature", "Average Temperature", temp_unit=temp_unit_code)
             if fig_c_temp:
-                st.plotly_chart(fig_c_temp, use_container_width=True)
+                st.plotly_chart(fig_c_temp, use_container_width=True, key="city_comp_temp_chart")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with comp_col2:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
             fig_c_rain = plot_city_comparison_bar(df, "rainfall", "Total Precipitation", temp_unit=temp_unit_code)
             if fig_c_rain:
-                st.plotly_chart(fig_c_rain, use_container_width=True)
+                st.plotly_chart(fig_c_rain, use_container_width=True, key="city_comp_rain_chart")
             else:
                 fig_c_hum = plot_city_comparison_bar(df, "humidity", "Average Humidity", temp_unit=temp_unit_code)
                 if fig_c_hum:
-                    st.plotly_chart(fig_c_hum, use_container_width=True)
+                    st.plotly_chart(fig_c_hum, use_container_width=True, key="city_comp_hum_chart")
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
@@ -814,7 +814,7 @@ with tab_ml:
         st.markdown("<br>", unsafe_allow_html=True)
         
         fig_pred = plot_temperature_prediction(pred_df, temp_unit=temp_unit_code)
-        st.plotly_chart(fig_pred, use_container_width=True)
+        st.plotly_chart(fig_pred, use_container_width=True, key="ml_prediction_chart_tab")
         
         st.markdown('</div>', unsafe_allow_html=True)
 
