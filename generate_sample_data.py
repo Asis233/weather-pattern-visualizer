@@ -1,19 +1,24 @@
 """
 Script to generate sample historical weather datasets for Weather Pattern Visualizer.
 Generates realistic, physically plausible seasonal variations for temperature, humidity,
-rainfall, and wind speed.
+rainfall, and wind speed, spanning up to the CURRENT DATE.
 """
 
 import os
+import datetime
 import numpy as np
 import pandas as pd
 
 os.makedirs("data", exist_ok=True)
 
+# Generate dates up to TODAY'S CURRENT DATE
+today = datetime.date.today()
+start_date = today - datetime.timedelta(days=365)
+dates = pd.date_range(start=start_date, end=today, freq="D")
+n_days = len(dates)
+
 # 1. Single City Sample Dataset (Seattle)
 np.random.seed(42)
-dates = pd.date_range(start="2024-01-01", end="2024-12-31", freq="D")
-n_days = len(dates)
 
 # Seasonal temperature wave (colder in Jan/Dec, warmer in July/Aug)
 day_of_year = dates.dayofyear
@@ -48,7 +53,7 @@ sample_df = pd.DataFrame({
 })
 
 sample_df.to_csv("data/sample_weather.csv", index=False)
-print("Created data/sample_weather.csv with", len(sample_df), "records.")
+print(f"Created data/sample_weather.csv with {len(sample_df)} records (spanning {start_date} to {today}).")
 
 # 2. Multi-City Sample Dataset (New York, London, Tokyo)
 cities_config = {
@@ -86,4 +91,4 @@ for city, cfg in cities_config.items():
 
 multi_df = pd.DataFrame(multi_rows)
 multi_df.to_csv("data/sample_multi_city.csv", index=False)
-print("Created data/sample_multi_city.csv with", len(multi_df), "records.")
+print(f"Created data/sample_multi_city.csv with {len(multi_df)} records (spanning {start_date} to {today}).")

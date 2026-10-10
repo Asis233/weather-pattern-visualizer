@@ -331,14 +331,15 @@ if not df.empty:
                 df = df[df["city"] == selected_city].copy()
                 
         # Date Filter
+        today_d = datetime.date.today()
         min_d = df["date"].min().date()
-        max_d = df["date"].max().date()
+        dataset_max_d = df["date"].max().date()
         
         date_range = st.date_input(
             "Filter Date Range",
-            value=(min_d, max_d),
+            value=(min_d, dataset_max_d),
             min_value=min_d,
-            max_value=max_d
+            max_value=today_d
         )
         if isinstance(date_range, tuple) and len(date_range) == 2:
             start_date, end_date = date_range
