@@ -61,17 +61,17 @@ def inject_pastel_css():
             color: {PASTEL_COLORS['text']};
         }}
         
-        /* Main Title Header Styling */
+        /* Modern Header Banner */
         .main-header {{
-            background: linear-gradient(135deg, #FFFFFF 0%, {PASTEL_COLORS['blue_light']} 100%);
-            padding: 24px 30px;
+            background: linear-gradient(135deg, #FFFFFF 0%, {PASTEL_COLORS['blue_light']} 60%, {PASTEL_COLORS['lavender_light']} 100%);
+            padding: 22px 28px;
             border-radius: 16px;
             border: 1px solid {PASTEL_COLORS['border']};
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }}
         .main-header h1 {{
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 700;
             color: {PASTEL_COLORS['text']};
             margin: 0 0 6px 0;
@@ -80,22 +80,22 @@ def inject_pastel_css():
             gap: 12px;
         }}
         .main-header p {{
-            font-size: 15px;
+            font-size: 14px;
             color: {PASTEL_COLORS['text_secondary']};
             margin: 0;
         }}
         
-        /* Pastel Card Wrapper */
+        /* Pastel Card Container */
         .pastel-card {{
             background-color: {PASTEL_COLORS['card_bg']};
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 22px;
             border: 1px solid {PASTEL_COLORS['border']};
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
             margin-bottom: 20px;
         }}
         
-        /* Metric Box Styling */
+        /* Summary Metric Box */
         .metric-card {{
             background-color: #FFFFFF;
             border-radius: 12px;
@@ -111,7 +111,7 @@ def inject_pastel_css():
         .metric-card.yellow {{ border-top-color: {PASTEL_COLORS['yellow_main']}; }}
         
         .metric-title {{
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -119,7 +119,7 @@ def inject_pastel_css():
             margin-bottom: 6px;
         }}
         .metric-value {{
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: {PASTEL_COLORS['text']};
         }}
@@ -131,19 +131,19 @@ def inject_pastel_css():
         
         /* Subheading Font Sizing */
         .section-heading {{
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 600;
             color: {PASTEL_COLORS['text']};
-            margin-top: 10px;
-            margin-bottom: 16px;
+            margin-top: 5px;
+            margin-bottom: 15px;
         }}
 
-        /* Narrative Explanation Box */
+        /* Narrative Box */
         .narrative-box {{
             background-color: {PASTEL_COLORS['lavender_light']};
             border-left: 4px solid {PASTEL_COLORS['lavender_main']};
             padding: 14px 18px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             line-height: 1.6;
             color: {PASTEL_COLORS['text']};
@@ -173,6 +173,29 @@ def inject_pastel_css():
             background-color: {PASTEL_COLORS['blue_light']};
             color: {PASTEL_COLORS['text']};
             border: 1px solid {PASTEL_COLORS['border']};
+        }}
+        
+        /* Streamlit Tabs Customization */
+        div[data-baseweb="tab-list"] {{
+            gap: 8px;
+            background-color: #FFFFFF;
+            padding: 6px 10px;
+            border-radius: 12px;
+            border: 1px solid {PASTEL_COLORS['border']};
+            margin-bottom: 20px;
+        }}
+        button[data-baseweb="tab"] {{
+            height: 42px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: {PASTEL_COLORS['text_secondary']};
+            border: none;
+            padding: 0 16px;
+        }}
+        button[aria-selected="true"] {{
+            background-color: {PASTEL_COLORS['blue_light']} !important;
+            color: {PASTEL_COLORS['text']} !important;
         }}
         
         /* Streamlit Native Overrides */
@@ -219,40 +242,21 @@ def get_header_live_weather():
     return fetch_current_weather(use_auto_location=True)
 
 # ---------------------------------------------------------
-# Sidebar Setup & Navigation
+# Sidebar Setup & Control Panel
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown(
         f"""
-        <div style="text-align: center; padding: 10px 0 20px 0;">
-            <div style="font-size: 40px; margin-bottom: 5px;">🌦️</div>
-            <div style="font-size: 20px; font-weight: 700; color: {PASTEL_COLORS['text']};">Weather Visualizer</div>
+        <div style="text-align: center; padding: 10px 0 15px 0;">
+            <div style="font-size: 38px; margin-bottom: 4px;">🌦️</div>
+            <div style="font-size: 19px; font-weight: 700; color: {PASTEL_COLORS['text']};">Weather Visualizer</div>
             <div style="font-size: 12px; color: {PASTEL_COLORS['text_secondary']};">Academic CSE Presentation</div>
         </div>
         """,
         unsafe_allow_html=True
     )
     
-    st.markdown("### 📌 Navigation")
-    nav_option = st.radio(
-        label="Select Section",
-        options=[
-            "Overview",
-            "Live Current Weather (API)",
-            "Historical Analysis",
-            "Temperature Trends",
-            "Rainfall Analysis",
-            "Humidity & Wind Analysis",
-            "Weather Comparison",
-            "Data Explorer",
-            "Temperature Prediction (AI)",
-            "About Project"
-        ],
-        label_visibility="collapsed"
-    )
-    
-    st.markdown("---")
-    st.markdown("### ⚙️ Settings & Controls")
+    st.markdown("### ⚙️ Data Source & Controls")
     
     # 1. Dataset Selection Choice
     dataset_choice = st.selectbox(
@@ -316,6 +320,8 @@ if not raw_df.empty:
 selected_city = None
 if not df.empty:
     with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 🔍 Filters & Range")
         # City Filter
         if "city" in df.columns and df["city"].nunique() > 1:
             city_options = ["All Cities"] + list(df["city"].unique())
@@ -359,8 +365,8 @@ st.markdown(
     f"""
     <div class="main-header">
         <h1>🌤️ Weather Pattern Visualizer</h1>
-        <p>Explore historical weather data, discover patterns, and auto-detect real-time live climate observations.</p>
-        <div style="margin-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <p>Explore historical climate patterns, auto-detect real-time weather observations, and model temperature trends.</p>
+        <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <span class="badge-pill">📅 Today: {current_date_str}</span>
             {live_header_badge}
             <span class="badge-pill" style="background-color: {PASTEL_COLORS['lavender_light']};">📂 Dataset: {source_badge}</span>
@@ -371,95 +377,62 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# Section 1: Overview Dashboard
+# TOP TAB NAVIGATION LAYOUT
 # ---------------------------------------------------------
-if nav_option == "Overview":
-    st.markdown('<div class="section-heading">📊 Overview Dashboard</div>', unsafe_allow_html=True)
+tab_overview, tab_live, tab_temp, tab_rain, tab_wind, tab_comp, tab_dataset, tab_ml, tab_explorer, tab_about = st.tabs([
+    "📊 Overview",
+    "📍 Live Weather",
+    "🌡️ Temperature",
+    "🌧️ Rainfall",
+    "💨 Wind & Humidity",
+    "🏙️ City Comparison",
+    "📂 Dataset Health",
+    "📈 ML Prediction",
+    "🔍 Data Explorer",
+    "ℹ️ About & Viva"
+])
+
+# ---------------------------------------------------------
+# Tab 1: Overview Dashboard
+# ---------------------------------------------------------
+with tab_overview:
+    st.markdown('<div class="section-heading">📊 Overview Dashboard Summary</div>', unsafe_allow_html=True)
     
     if df.empty:
         st.warning("⚠️ No data available. Please select a valid dataset or upload a CSV file.")
     else:
         metrics = calculate_summary_metrics(df, selected_city=selected_city, temp_unit=temp_unit_code)
-        
-        # Metric Cards Layout
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
-        
         unit = metrics["unit_symbol"]
+        
+        # 6-Column Summary Metrics Grid
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
         
         with c1:
             val = f"{metrics['avg_temp']}{unit}" if metrics['avg_temp'] is not None else "N/A"
-            st.markdown(
-                f"""
-                <div class="metric-card">
-                    <div class="metric-title">Avg Temp</div>
-                    <div class="metric-value">{val}</div>
-                    <div class="metric-sub">Mean observed</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card"><div class="metric-title">Avg Temp</div><div class="metric-value">{val}</div><div class="metric-sub">Mean observed</div></div>', unsafe_allow_html=True)
             
         with c2:
             val = f"{metrics['max_temp']}{unit}" if metrics['max_temp'] is not None else "N/A"
-            st.markdown(
-                f"""
-                <div class="metric-card peach">
-                    <div class="metric-title">Max Temp</div>
-                    <div class="metric-value">{val}</div>
-                    <div class="metric-sub">Peak recorded</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card peach"><div class="metric-title">Max Temp</div><div class="metric-value">{val}</div><div class="metric-sub">Peak recorded</div></div>', unsafe_allow_html=True)
 
         with c3:
             val = f"{metrics['min_temp']}{unit}" if metrics['min_temp'] is not None else "N/A"
-            st.markdown(
-                f"""
-                <div class="metric-card lavender">
-                    <div class="metric-title">Min Temp</div>
-                    <div class="metric-value">{val}</div>
-                    <div class="metric-sub">Lowest recorded</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card lavender"><div class="metric-title">Min Temp</div><div class="metric-value">{val}</div><div class="metric-sub">Lowest recorded</div></div>', unsafe_allow_html=True)
 
         with c4:
             val = f"{metrics['total_rainfall']} mm" if metrics['total_rainfall'] is not None else "N/A"
-            st.markdown(
-                f"""
-                <div class="metric-card mint">
-                    <div class="metric-title">Total Rain</div>
-                    <div class="metric-value">{val}</div>
-                    <div class="metric-sub">{metrics['rainy_days'] or 0} rainy days</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card mint"><div class="metric-title">Total Rain</div><div class="metric-value">{val}</div><div class="metric-sub">{metrics["rainy_days"] or 0} rainy days</div></div>', unsafe_allow_html=True)
 
         with c5:
             val = f"{metrics['avg_humidity']}%" if metrics['avg_humidity'] is not None else "N/A"
-            st.markdown(
-                f"""
-                <div class="metric-card yellow">
-                    <div class="metric-title">Avg Humidity</div>
-                    <div class="metric-value">{val}</div>
-                    <div class="metric-sub">Relative humidity</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card yellow"><div class="metric-title">Avg Humidity</div><div class="metric-value">{val}</div><div class="metric-sub">Relative humidity</div></div>', unsafe_allow_html=True)
 
         with c6:
-            st.markdown(
-                f"""
-                <div class="metric-card">
-                    <div class="metric-title">Records</div>
-                    <div class="metric-value">{metrics['total_records']}</div>
-                    <div class="metric-sub">{metrics['date_start']} to {metrics['date_end']}</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="metric-card"><div class="metric-title">Records</div><div class="metric-value">{metrics["total_records"]}</div><div class="metric-sub">{metrics["date_start"]} to {metrics["date_end"]}</div></div>', unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Main Visual Highlights
+        # Dual Highlights Panel
         col_left, col_right = st.columns([7, 5])
         
         with col_left:
@@ -478,20 +451,20 @@ if nav_option == "Overview":
                 st.plotly_chart(fig_m_temp, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Automated Insights Banner
+        # Executive Summary Narrative Banner
         narratives = generate_automated_narrative(df, temp_unit=temp_unit_code)
         st.markdown(f'<div class="narrative-box blue"><b>💡 Executive Insights:</b><br>{narratives["temp_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 2: Live Current Weather (API Auto-Detection)
+# Tab 2: Live Current Weather (Auto-Detection)
 # ---------------------------------------------------------
-elif nav_option == "Live Current Weather (API)":
-    st.markdown('<div class="section-heading">🌤️ Real-Time Live Weather Detection & Observation</div>', unsafe_allow_html=True)
+with tab_live:
+    st.markdown('<div class="section-heading">📍 Real-Time Live Weather Auto-Detection</div>', unsafe_allow_html=True)
     
     st.markdown(
         """
         <div class="narrative-box mint">
-            <b>📍 Live Location Auto-Detection Active:</b><br>
+            <b>🎯 IP Location Auto-Detection Active:</b><br>
             Automatically detects your current city and geographic coordinates using IP location APIs. 
             <i>Works zero-configuration out-of-the-box via Open-Meteo Live API, or connects to your custom OpenWeatherMap API key!</i>
         </div>
@@ -499,11 +472,8 @@ elif nav_option == "Live Current Weather (API)":
         unsafe_allow_html=True
     )
 
-    # Session State for Live Weather Search
     if "live_weather_city" not in st.session_state:
         st.session_state["live_weather_city"] = ""
-    if "use_auto" not in st.session_state:
-        st.session_state["use_auto"] = True
 
     c_search, c_auto_btn, c_unit = st.columns([3, 2, 1])
     
@@ -517,7 +487,6 @@ elif nav_option == "Live Current Weather (API)":
     with c_auto_btn:
         st.write("&nbsp;")
         if st.button("🎯 Auto-Detect My Location"):
-            st.session_state["use_auto"] = True
             st.session_state["live_weather_city"] = ""
             st.rerun()
 
@@ -525,17 +494,12 @@ elif nav_option == "Live Current Weather (API)":
         unit_choice = st.selectbox("API Units", options=["Metric (°C, m/s)", "Imperial (°F, mph)"])
         api_units = "imperial" if "Imperial" in unit_choice else "metric"
 
-    # Determine query mode
     api_key_to_use = user_api_key if user_api_key else None
     
-    if search_city.strip():
-        query_city = search_city.strip()
-        is_auto_mode = False
-    else:
-        query_city = None
-        is_auto_mode = True
+    query_city = search_city.strip() if search_city.strip() else None
+    is_auto_mode = not bool(search_city.strip())
 
-    with st.spinner("Fetching live real-time weather observations..."):
+    with st.spinner("Fetching real-time weather observations..."):
         result = fetch_current_weather(
             city_name=query_city, 
             api_key=api_key_to_use, 
@@ -548,7 +512,7 @@ elif nav_option == "Live Current Weather (API)":
         
         c_header, c_icon = st.columns([4, 1])
         with c_header:
-            loc_label = "🎯 Auto-Detected Current Location" if result.get("is_detected") else "🔍 Searched Location"
+            loc_label = "🎯 Auto-Detected Location" if result.get("is_detected") else "🔍 Searched Location"
             st.caption(f"{loc_label} • Powered by {result.get('provider')}")
             st.markdown(f"### {result['city']}{', ' + result['country'] if result['country'] else ''}")
             st.markdown(f"#### **{result['icon_emoji']} {result['description']}**")
@@ -570,62 +534,21 @@ elif nav_option == "Live Current Weather (API)":
         st.error(f"❌ Weather Error: {result['message']}")
 
 # ---------------------------------------------------------
-# Section 3: Historical Analysis
+# Tab 3: Temperature Trends
 # ---------------------------------------------------------
-elif nav_option == "Historical Analysis":
-    st.markdown('<div class="section-heading">📂 Historical Dataset Analysis & Quality Check</div>', unsafe_allow_html=True)
-    
-    if df.empty:
-        st.info("Please upload a CSV dataset or select a sample dataset from the sidebar.")
-    else:
-        st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
-        st.subheader("Data Quality & Standard Mapping Status")
-        
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.write("**Detected Column Mapping:**")
-            mapping_df = pd.DataFrame([
-                {"Standard Field": k, "Dataset Column": v if v else "⚠️ Missing"} 
-                for k, v in column_mapping.items()
-            ])
-            st.dataframe(mapping_df, use_container_width=True, hide_index=True)
-            
-        with col_b:
-            st.write("**Data Hygiene Summary:**")
-            st.write(f"- Total Rows: `{len(df)}`")
-            st.write(f"- Date Range: `{df['date'].min().strftime('%Y-%m-%d')}` to `{df['date'].max().strftime('%Y-%m-%d')}`")
-            st.write(f"- Missing Temperature Values: `{df['temperature'].isna().sum() if 'temperature' in df.columns else 'N/A'}`")
-            st.write(f"- Missing Rainfall Values: `{df['rainfall'].isna().sum() if 'rainfall' in df.columns else 'N/A'}`")
-            
-            if cleaning_warnings:
-                st.warning("⚠️ Data Cleaning Notes:\n" + "\n".join([f"- {w}" for w in cleaning_warnings]))
-            else:
-                st.success("✅ Dataset is clean with zero missing dates or corrupted rows.")
-                
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Dataset Preview Table
-        st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
-        st.subheader("Dataset Preview (First 15 Rows)")
-        st.dataframe(df.head(15), use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# Section 4: Temperature Trends
-# ---------------------------------------------------------
-elif nav_option == "Temperature Trends":
+with tab_temp:
     st.markdown('<div class="section-heading">🌡️ Temperature Variation & Seasonal Trends</div>', unsafe_allow_html=True)
     
     if df.empty or "temperature" not in df.columns:
         st.warning("Temperature data is not available in the current dataset.")
     else:
-        # Chart 1: Daily Variation
+        # Time-Series Daily Plot
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         fig1 = plot_daily_temperature_trend(df, temp_unit=temp_unit_code)
         st.plotly_chart(fig1, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Charts 2 & 3: Monthly Avg & Min/Max Range
+        # Monthly & Range Side-by-Side
         c_left, c_right = st.columns(2)
         with c_left:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
@@ -656,20 +579,18 @@ elif nav_option == "Temperature Trends":
                 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Automated Trend Explanation
         narratives = generate_automated_narrative(df, temp_unit=temp_unit_code)
         st.markdown(f'<div class="narrative-box peach"><b>📊 Temperature Trend Explanation:</b><br>{narratives["temp_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 5: Rainfall Analysis
+# Tab 4: Rainfall Analysis
 # ---------------------------------------------------------
-elif nav_option == "Rainfall Analysis":
+with tab_rain:
     st.markdown('<div class="section-heading">🌧️ Precipitation & Rainfall Analysis</div>', unsafe_allow_html=True)
     
     if df.empty or "rainfall" not in df.columns or not df["rainfall"].notna().any():
-        st.warning("⚠️ Rainfall information is unavailable in the current dataset. Please upload a dataset containing a precipitation or rainfall column (e.g., 'rainfall', 'precipitation', 'precip', 'rain').")
+        st.warning("⚠️ Rainfall information is unavailable in the current dataset. Upload a dataset containing a rainfall or precipitation column.")
     else:
-        # Metrics Row
         r1, r2, r3 = st.columns(3)
         total_r = round(df["rainfall"].sum(), 1)
         rainy_d = int((df["rainfall"] > 0.1).sum())
@@ -684,7 +605,6 @@ elif nav_option == "Rainfall Analysis":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Rainfall Charts
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
@@ -700,26 +620,23 @@ elif nav_option == "Rainfall Analysis":
                 st.plotly_chart(fig_monthly_r, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Explanation
         narratives = generate_automated_narrative(df, temp_unit=temp_unit_code)
         st.markdown(f'<div class="narrative-box mint"><b>🌧️ Precipitation Pattern Summary:</b><br>{narratives["rain_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 6: Humidity & Wind Analysis
+# Tab 5: Humidity & Wind Analysis
 # ---------------------------------------------------------
-elif nav_option == "Humidity & Wind Analysis":
+with tab_wind:
     st.markdown('<div class="section-heading">💨 Humidity & Wind Speed Dynamics</div>', unsafe_allow_html=True)
     
     if df.empty:
         st.warning("No data available for humidity and wind analysis.")
     else:
-        # Time Series
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         fig_hw = plot_humidity_wind_trends(df)
         st.plotly_chart(fig_hw, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Correlation Scatter Plots
         c1, c2 = st.columns(2)
         with c1:
             st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
@@ -739,7 +656,6 @@ elif nav_option == "Humidity & Wind Analysis":
                 st.info("Rainfall data missing for rainfall-humidity correlation plot.")
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Heatmap
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         st.subheader("Multivariate Feature Correlation Heatmap")
         fig_hm = plot_seaborn_correlation_heatmap(df)
@@ -751,12 +667,11 @@ elif nav_option == "Humidity & Wind Analysis":
         st.markdown(f'<div class="narrative-box blue"><b>💡 Humidity & Wind Insights:</b><br>{narratives["humidity_narrative"]}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 7: Weather Comparison
+# Tab 6: Weather Comparison
 # ---------------------------------------------------------
-elif nav_option == "Weather Comparison":
+with tab_comp:
     st.markdown('<div class="section-heading">🏙️ Multi-City Weather Comparison</div>', unsafe_allow_html=True)
     
-    # Check if multiple cities are present
     if df.empty:
         st.warning("No dataset loaded.")
     elif "city" not in df.columns or df["city"].nunique() <= 1:
@@ -766,12 +681,12 @@ elif nav_option == "Weather Comparison":
                 📌 <b>Single City Dataset Detected:</b><br>
                 The active dataset currently contains data for only one city 
                 (<b>{df['city'].iloc[0] if 'city' in df.columns else 'Selected Location'}</b>).<br><br>
-                To explore multi-city comparison charts, click the button below to switch to the <b>Multi-City Sample Dataset</b>!
+                To explore multi-city comparison charts, click below to switch to the <b>Multi-City Sample Dataset</b>!
             </div>
             """,
             unsafe_allow_html=True
         )
-        if st.button("🔄 Load Multi-City Sample Dataset"):
+        if st.button("🔄 Switch to Multi-City Sample Dataset"):
             st.sidebar.selectbox("Data Source", options=["Sample Dataset (Multi-City)"], index=0)
             st.rerun()
     else:
@@ -797,7 +712,6 @@ elif nav_option == "Weather Comparison":
                     st.plotly_chart(fig_c_hum, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Detailed Comparison Table
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
         st.subheader("Statistical City Comparison Summary Table")
         
@@ -818,58 +732,49 @@ elif nav_option == "Weather Comparison":
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 8: Data Explorer
+# Tab 7: Dataset Health & Quality
 # ---------------------------------------------------------
-elif nav_option == "Data Explorer":
-    st.markdown('<div class="section-heading">🔍 Data Explorer & Export</div>', unsafe_allow_html=True)
+with tab_dataset:
+    st.markdown('<div class="section-heading">📂 Dataset Quality & Column Mapping</div>', unsafe_allow_html=True)
     
     if df.empty:
-        st.warning("No data available.")
+        st.info("Please upload a CSV dataset or select a sample dataset from the sidebar.")
     else:
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
+        st.subheader("Data Quality & Standard Mapping Status")
         
-        # Explorer Filters
-        f1, f2, f3 = st.columns(3)
-        with f1:
-            search_query = st.text_input("🔍 Search Date or City", placeholder="e.g. 2024-06 or Seattle")
-        with f2:
-            selected_cols = st.multiselect("Select Display Columns", options=list(df.columns), default=list(df.columns)[:7])
-        with f3:
-            st.write("&nbsp;")
-            # CSV Download Button
-            csv_data = df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 Download Cleaned Dataset (CSV)",
-                data=csv_data,
-                file_name=f"cleaned_weather_data_{datetime.date.today()}.csv",
-                mime="text/csv"
-            )
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.write("**Detected Column Mapping:**")
+            mapping_df = pd.DataFrame([
+                {"Standard Field": k, "Dataset Column": v if v else "⚠️ Missing"} 
+                for k, v in column_mapping.items()
+            ])
+            st.dataframe(mapping_df, use_container_width=True, hide_index=True)
             
-        # Filtering logic
-        filtered_df = df.copy()
-        if search_query:
-            mask = filtered_df.astype(str).apply(lambda row: row.str.contains(search_query, case=False).any(), axis=1)
-            filtered_df = filtered_df[mask]
+        with col_b:
+            st.write("**Data Hygiene Summary:**")
+            st.write(f"- Total Rows: `{len(df)}`")
+            st.write(f"- Date Range: `{df['date'].min().strftime('%Y-%m-%d')}` to `{df['date'].max().strftime('%Y-%m-%d')}`")
+            st.write(f"- Missing Temperature Values: `{df['temperature'].isna().sum() if 'temperature' in df.columns else 'N/A'}`")
+            st.write(f"- Missing Rainfall Values: `{df['rainfall'].isna().sum() if 'rainfall' in df.columns else 'N/A'}`")
             
-        st.markdown(f"**Showing {len(filtered_df)} of {len(df)} records**")
-        
-        if selected_cols:
-            st.dataframe(filtered_df[selected_cols], use_container_width=True)
-        else:
-            st.dataframe(filtered_df, use_container_width=True)
-            
+            if cleaning_warnings:
+                st.warning("⚠️ Data Cleaning Notes:\n" + "\n".join([f"- {w}" for w in cleaning_warnings]))
+            else:
+                st.success("✅ Dataset is clean with zero missing dates or corrupted rows.")
+                
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Descriptive Statistics
         st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
-        st.subheader("Descriptive Statistics Summary (`df.describe()`)")
-        st.dataframe(df.describe().round(2), use_container_width=True)
+        st.subheader("Dataset Preview (First 15 Rows)")
+        st.dataframe(df.head(15), use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 9: Temperature Trend Prediction (AI/ML)
+# Tab 8: ML Temperature Prediction
 # ---------------------------------------------------------
-elif nav_option == "Temperature Prediction (AI)":
+with tab_ml:
     st.markdown('<div class="section-heading">📈 Temperature Trend Prediction (Scikit-Learn ML)</div>', unsafe_allow_html=True)
     
     st.markdown(
@@ -899,7 +804,6 @@ elif nav_option == "Temperature Prediction (AI)":
             
         metrics, pred_df = train_temperature_trend_model(df, forecast_days=forecast_horizon, use_polynomial=use_poly, temp_unit=temp_unit_code)
         
-        # Display Model Performance Metrics
         pm1, pm2, pm3, pm4 = st.columns(4)
         with pm1:
             st.markdown(f'<div class="metric-card"><div class="metric-title">Model R² Score</div><div class="metric-value">{metrics["r2_score"]}</div><div class="metric-sub">Goodness of fit</div></div>', unsafe_allow_html=True)
@@ -918,9 +822,54 @@ elif nav_option == "Temperature Prediction (AI)":
         st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Section 10: About Project
+# Tab 9: Data Explorer
 # ---------------------------------------------------------
-elif nav_option == "About Project":
+with tab_explorer:
+    st.markdown('<div class="section-heading">🔍 Data Explorer & Dataset Export</div>', unsafe_allow_html=True)
+    
+    if df.empty:
+        st.warning("No data available.")
+    else:
+        st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
+        
+        f1, f2, f3 = st.columns(3)
+        with f1:
+            search_query = st.text_input("🔍 Search Date or City", placeholder="e.g. 2024-06 or Seattle")
+        with f2:
+            selected_cols = st.multiselect("Select Display Columns", options=list(df.columns), default=list(df.columns)[:7])
+        with f3:
+            st.write("&nbsp;")
+            csv_data = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Cleaned Dataset (CSV)",
+                data=csv_data,
+                file_name=f"cleaned_weather_data_{datetime.date.today()}.csv",
+                mime="text/csv"
+            )
+            
+        filtered_df = df.copy()
+        if search_query:
+            mask = filtered_df.astype(str).apply(lambda row: row.str.contains(search_query, case=False).any(), axis=1)
+            filtered_df = filtered_df[mask]
+            
+        st.markdown(f"**Showing {len(filtered_df)} of {len(df)} records**")
+        
+        if selected_cols:
+            st.dataframe(filtered_df[selected_cols], use_container_width=True)
+        else:
+            st.dataframe(filtered_df, use_container_width=True)
+            
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
+        st.subheader("Descriptive Statistics Summary (`df.describe()`)")
+        st.dataframe(df.describe().round(2), use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# Tab 10: About & Viva Presentation Notes
+# ---------------------------------------------------------
+with tab_about:
     st.markdown('<div class="section-heading">ℹ️ About Project & Academic Viva Notes</div>', unsafe_allow_html=True)
     
     st.markdown('<div class="pastel-card">', unsafe_allow_html=True)
